@@ -1,8 +1,8 @@
 Package.describe({
     name: 'meteorhubdotnet:firestorm-helpers',
-    summary: 'Helper functions for Firestorm. Includes Iron Router helpers and simple operators for Blaze templates',
+    summary: 'Helper functions for Firestorm. Includes Iron Router and Blaze helpers.',
     version: '1.0.0',
-    git: '#',
+    git: 'https://github.com/meteorhubdotnet/firestorm-helpers',
 });
 
 Package.onUse(function(api) {
@@ -10,7 +10,7 @@ Package.onUse(function(api) {
     api.versionsFrom('METEOR@2.2');
 
     api.use([
-        'meteorhubdotnet:firestorm-iron-router',
+        'meteorhubdotnet:firestorm-iron-router@1.0.5',
         'ui@1.0.13',
         'templating@1.4.0',
         'modules',
