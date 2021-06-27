@@ -63,7 +63,7 @@ UI.registerHelper('activeRoute', function() {
 // ===================================================
 Template.registerHelper('humanReadableDate', function(dateData) {
 
-    console.log(dateData);
+    // console.log(dateData);
 
     // If date has been provided
     if (dateData && dateData.hash && dateData.hash.date) {
