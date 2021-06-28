@@ -73,7 +73,9 @@ Template.registerHelper('humanReadableDate', function(dateData) {
 
         // If date value is string, cast it into Date
         if ($.type(date) === "string") {
-            date = new Date(dateData.hash.date);
+            // Using .split('-') forces new Date to be created with
+            // GMT timezone and doesn't mess with calendar day
+            date = new Date(dateData.hash.date.split('-'));
         }
 
         // Return false if date isn't valid
