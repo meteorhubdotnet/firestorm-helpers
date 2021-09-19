@@ -1,5 +1,7 @@
 import { Template } from 'meteor/templating';
 import { format, isValid } from 'date-fns';
+import { Router } from 'meteor/meteorhubdotnet:firestorm-iron-router';
+
 // const {format} = Npm.require('date-fns');
 // ===================================================
 // HELPER: eq
@@ -27,6 +29,20 @@ UI.registerHelper('or', function(value1, value2) {
 
     // do it
     return value1 || value2;
+
+});
+
+// ===================================================
+// HELPER: greater than or equal
+// Checks for presence of either value
+// @arg Mixed: value1
+// @arg Mixed: value2
+// @return Boolean: whether value1 is gte value2
+// ===================================================
+UI.registerHelper('gte', function(value1, value2) {
+
+    // do it
+    return value1 >= value2;
 
 });
 
