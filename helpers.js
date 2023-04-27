@@ -2,62 +2,97 @@ import { Template } from 'meteor/templating';
 import { format, isValid } from 'date-fns';
 import { Router } from 'meteor/meteorhubdotnet:firestorm-iron-router';
 
-// const {format} = Npm.require('date-fns');
 // ===================================================
 // HELPER: eq
-// Checks for equality between 2 provided variables
 // @arg Mixed: value1
 // @arg Mixed: value2
 // @return Boolean: whether the 2 values are equal or not
 // ===================================================
-
 UI.registerHelper('eq', function(value1, value2) {
-
     // do it
     return value1 === value2;
-
 });
 
 // ===================================================
 // HELPER: or
-// Checks for presence of either value
 // @arg Mixed: value1
 // @arg Mixed: value2
 // @return Boolean: whether either value is present
 // ===================================================
 UI.registerHelper('or', function(value1, value2) {
-
     // do it
     return value1 || value2;
-
 });
 
 // ===================================================
 // HELPER: greater than or equal
-// Checks for presence of either value
 // @arg Mixed: value1
 // @arg Mixed: value2
 // @return Boolean: whether value1 is gte value2
 // ===================================================
 UI.registerHelper('gte', function(value1, value2) {
-
     // do it
     return value1 >= value2;
+});
 
+// ===================================================
+// HELPER: greater than
+// Checks for presence of either value
+// @arg Mixed: value1
+// @arg Mixed: value2
+// @return Boolean: whether value1 is gt value2
+// ===================================================
+UI.registerHelper('gt', function(value1, value2) {
+    // do it
+    return value1 > value2;
+});
+
+// ===================================================
+// HELPER: lesser than or equal
+// @arg Mixed: value1
+// @arg Mixed: value2
+// @return Boolean: whether value1 is lte value2
+// ===================================================
+UI.registerHelper('lte', function(value1, value2) {
+    // do it
+    return value1 <= value2;
+});
+
+// ===================================================
+// HELPER: Percentage
+// Get a percentage integer from 2 values
+// @arg Mixed: value1
+// @arg Mixed: value2
+// @return Number: percentage
+// ===================================================
+UI.registerHelper('percentage', function(numbers) {
+    if (numbers?.hash?.numerator && numbers?.hash?.numerator) {
+        return Math.ceil(numbers.hash.numerator / numbers.hash.denominator * 100);
+    }
+    return 0;
+});
+
+// ===================================================
+// HELPER: lesser than
+// @arg Mixed: value1
+// @arg Mixed: value2
+// @return Boolean: whether value1 is lt value2
+// ===================================================
+UI.registerHelper('lt', function(value1, value2) {
+    // do it
+    return value1 < value2;
 });
 
 // ===================================================
 // HELPER: inc
-// Checks inf value2 is in value1
+// Checks if value2 is in value1
 // @arg Mixed: value1
 // @arg Mixed: value2
 // @return Boolean whether value2 is in value1
 // ===================================================
 UI.registerHelper('inc', function(value1, value2) {
-
     // do it
     return value1?.includes(value2);
-
 });
 
 // ===================================================
@@ -66,20 +101,17 @@ UI.registerHelper('inc', function(value1, value2) {
 // @return String name of route
 // ===================================================
 UI.registerHelper('activeRoute', function() {
-
     return Router.current().route.getName();
-
 });
 
 // ===================================================
 // HELPER: humanReadableDate
-// Takes a date string in yyyy-MM-DD format and formats it to make sense to humans
-// @args dateData: how to format the date
+// Takes a Date object or a date string in yyyy-MM-DD format and formats it to make sense to humans
+// @args date: js Date object or date string in yyyy-MM-DD format
+// @args format: string, optional, can be a preset like 'short', 'timestamp', etc, or a date format string - defaults to 'MMMM do, yyyy'
 // @return String: the formatted date
 // ===================================================
 Template.registerHelper('humanReadableDate', function(dateData) {
-
-    // console.log(dateData);
 
     // If date has been provided
     if (dateData && dateData.hash && dateData.hash.date) {
@@ -99,6 +131,14 @@ Template.registerHelper('humanReadableDate', function(dateData) {
             return false;
         }
 
+        // If format="short" was provided
+        if (dateData.hash.format === 'sql') {
+
+            // Format example: Dec 31st '18
+            return format(date, 'YYYY-MM-DD');
+
+        }
+
         // Format example: Dec 31st '18
         if (dateData.hash.format === 'short') {
             return format(date, "MMM do ''yy");
@@ -114,9 +154,17 @@ Template.registerHelper('humanReadableDate', function(dateData) {
             return format(date, 'MMMM do, yyyy');
         }
 
-        // Format example: December 31st 2018 - 9:12AM
+        // Format example: January 1st 2018 @ 9:12AM
         if (dateData.hash.format === 'timestamp') {
             return format(date, "MMMM do yyyy @ h:mma");
+        }
+
+        // If format="timestamp" was provided
+        if (dateData.hash.format === 'datatimestamp') {
+
+            // Format example: 2023-12-31 @ 9:12AM
+            return format(date, 'YYYY-MM-DD @ HH:mm');
+
         }
 
         // Format example: 9:12AM
@@ -130,7 +178,7 @@ Template.registerHelper('humanReadableDate', function(dateData) {
         }
 
         // If no formation was provided
-        // Format example: December 31st 2018
+        // Format example: December 31st, 2018
         return format(date , 'MMMM do, yyyy');
 
     }
@@ -146,9 +194,37 @@ Template.registerHelper('humanReadableDate', function(dateData) {
 // @return Number zero-index value plus 1
 // ===================================================
 UI.registerHelper('cardinality', function(index) {
-
     return index + 1;
+});
 
+// ===================================================
+// HELPER: cardinalityString
+// Takes a 0-index value and returns cardinality (adds 1) with the counting suffix (st, nd, rd, th);
+// @return Number zero-index value plus 1
+// ===================================================
+UI.registerHelper('cardinalityString', function(index) {
+    const cardinality = index + 1;
+    const cardinalityString = cardinality.toString();
+    const cardinalityStringLastNumber = cardinalityString.slice(-1);
+    const cardinalityStringLastTwoNumbers = cardinalityString.slice(-2);
+    let suffix = 'th';
+    if (cardinalityStringLastNumber === '1') {
+        suffix = 'st';
+        if (cardinalityStringLastTwoNumbers === '11') {
+            suffix = 'th';
+        }
+    } else if (cardinalityStringLastNumber === '2') {
+        suffix = 'nd';
+        if (cardinalityStringLastTwoNumbers === '12') {
+            suffix = 'th';
+        }
+    } else if (cardinalityStringLastNumber === '3') {
+        suffix = 'rd';
+        if (cardinalityStringLastTwoNumbers === '13') {
+            suffix = 'th';
+        }
+    }
+    return cardinality + suffix;
 });
 
 // ===================================================
@@ -159,24 +235,31 @@ UI.registerHelper('cardinality', function(index) {
 // ===================================================
 UI.registerHelper('toCurrency', function(num) {
 
-    return parseFloat(num).toFixed(2).toString();
+    return parseFloat(num).toFixed(2).toLocaleString('en-US');
 
+});
+
+// ===================================================
+// HELPER: toDollarsCurrency
+// Converts number into float with 2 decimals and adds a leading $
+// @arg mixed the number
+// @return String the value with 2 decimals and a leading $
+// ===================================================
+UI.registerHelper('toDollarsCurrency', function(num) {
+    return '$' + parseFloat(num).toFixed(2).toLocaleString('en-US');
 });
 
 // ===================================================
 // HELPER: formatNumber
 // Returns a string with a language-sensitive representation of this number.
-// @arg mixed the number
+// @arg num: the number
 // @return String the value, or 0 if no value was provided
 // ===================================================
 UI.registerHelper('formatNumber', function(numberData) {
-
     if (numberData?.hash?.num) {
         return parseFloat(numberData.hash.num).toLocaleString();
     }
-
     return "0";
-
 });
 
 // ===================================================
@@ -239,4 +322,68 @@ UI.registerHelper('truncate', function(data) {
 
     return trimmedString;
 
+});
+
+UI.registerHelper('toUppercase', function(string) {
+    return string.toUpperCase();
+
+});
+
+UI.registerHelper('toLowercase', function(string) {
+
+    return string.toLowerCase();
+
+});
+
+// ===================================================
+// HELPER: inc
+// Checks inf value2 is in value1
+// @arg Mixed: value1
+// @arg Mixed: value2
+// @return Boolean whether value2 is in value1
+// ===================================================
+UI.registerHelper('inc', function(value1, value2) {
+
+    // Do it
+    return value1?.includes(value2);
+
+});
+
+/**
+ * HELPER: isNumber
+ *
+ * Checks if value is a number
+ *
+ * @param: Mixed : value to check
+ * @returns : Boolean
+ */
+UI.registerHelper('isNumber', function( number ){
+    return !isNaN(number);
+});
+
+UI.registerHelper('dump', function( data ){
+    return "DUMP\n==================\n" + JSON.stringify(data,null,'\t');
+});
+
+UI.registerHelper('centsToDollars', function(cents) {
+
+    return parseFloat(cents/100).toFixed(2);
+
+});
+
+UI.registerHelper('centsToDollarsCurrency', function( n ){
+    return '$' + (parseFloat(n)/100).toFixed(2);
+});
+
+UI.registerHelper('stringifyId', function(id){
+    return id && typeOf(id) == "String" ? id : id._str;
+})
+
+//Text Area to HTML Helper
+UI.registerHelper('textareaToHTML', function( content ) {
+    return Spacebars.SafeString( content.replace(/\n/g, '<br><br>') );
+});
+
+UI.registerHelper('isZero',function( n ){
+    return parseInt(n) == 0 ? true : false;
 });
